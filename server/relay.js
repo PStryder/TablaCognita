@@ -60,6 +60,18 @@ export class Relay {
       ws.on('close', () => {
         console.error(`[relay] Editor disconnected for session: ${token}`);
         this.sessions.unbindEditor(token);
+        // Resolve all pending requests immediately — don't make the agent wait 90s
+        for (const [id, { resolve, timer }] of this.pending) {
+          clearTimeout(timer);
+          this.pending.delete(id);
+          resolve({
+            ok: false,
+            error: makeError(
+              ErrorCode.NO_EDITOR_CONNECTED,
+              'Browser editor disconnected during request'
+            ),
+          });
+        }
       });
 
       ws.on('error', (err) => {

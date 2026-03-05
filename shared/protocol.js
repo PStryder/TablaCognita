@@ -73,7 +73,8 @@ export const ToolToRequest = {
 };
 
 // Relay config
-export const RELAY_TIMEOUT_MS = 30_000;
+// Must be longer than CONFIRMATION_TIMEOUT_MS (60s) in editor/app.js
+export const RELAY_TIMEOUT_MS = 90_000;
 export const MAX_EVENT_QUEUE = 50;
 export const DEFAULT_LOCK_TTL = 30;
 export const MAX_LOCK_TTL = 120;

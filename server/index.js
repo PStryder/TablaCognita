@@ -27,12 +27,23 @@ const portArg = args.includes('--port') ? parseInt(args[args.indexOf('--port') +
 const sessionManager = new SessionManager();
 const relay = new Relay(sessionManager);
 
-// Express app for static files + future SSE
+// Express app for static files + MCP SSE
 const app = express();
+
+// CORS — wide open for MCP client access
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  next();
+});
+app.options('*', (_req, res) => res.sendStatus(204));
+
 app.use(express.static(path.join(__dirname, '..', 'editor')));
 app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
 
 // File read endpoint for open_document
+// NOTE: No path restriction — intentionally open for MVP. Restrict before production.
 app.get('/api/read-file', (req, res) => {
   const filePath = req.query.path;
   if (!filePath) {
