@@ -1,0 +1,21 @@
+{
+  "name": "tabla-cognita",
+  "version": "0.1.0",
+  "description": "MCP-native collaborative markdown editor",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "start:stdio": "node server/index.js --transport stdio",
+    "start:sse": "node server/index.js --transport sse",
+    "test": "node --test test/sections.test.js test/fuzzy.test.js test/locks.test.js test/notifications.test.js test/relay.test.js",
+    "test:sections": "node --test test/sections.test.js",
+    "test:fuzzy": "node --test test/fuzzy.test.js",
+    "test:relay": "node --test test/relay.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {}
+}

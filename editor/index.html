@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TablaCognita</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="toolbar">
+    <h1>TablaCognita</h1>
+    <button id="new-doc-btn" class="toolbar-btn" title="New blank document">New</button>
+    <button id="open-file-btn" class="toolbar-btn" title="Open markdown file">Open</button>
+    <button id="save-file-btn" class="toolbar-btn" title="Save file">Save</button>
+    <input type="file" id="file-input" accept=".md,.markdown,.txt,.text" hidden>
+    <span id="file-name"></span>
+    <span class="toolbar-spacer"></span>
+    <span id="connection-status" class="status disconnected">Disconnected</span>
+    <span id="session-token"></span>
+  </header>
+  <main id="workspace">
+    <div id="editor-pane"></div>
+    <div id="resize-handle"></div>
+    <div id="preview-pane"></div>
+  </main>
+
+  <!-- Marked for preview rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@14.0.0/marked.min.js"></script>
+  <!-- DOMPurify for XSS protection in preview -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+
+  <!-- CodeMirror 6 via ESM CDN -->
+  <script type="importmap">
+  {
+    "imports": {
+      "codemirror": "https://esm.sh/codemirror@6.0.1",
+      "@codemirror/lang-markdown": "https://esm.sh/@codemirror/lang-markdown@6.3.2",
+      "@codemirror/language-data": "https://esm.sh/@codemirror/language-data@6.5.1"
+    }
+  }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
