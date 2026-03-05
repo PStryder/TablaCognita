@@ -4,9 +4,9 @@
   "description": "MCP-native collaborative markdown editor",
   "type": "module",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node server/index.js --transport http",
     "start:stdio": "node server/index.js --transport stdio",
-    "start:sse": "node server/index.js --transport sse",
+    "start:http": "node server/index.js --transport http",
     "test": "node --test test/sections.test.js test/fuzzy.test.js test/locks.test.js test/notifications.test.js test/relay.test.js",
     "test:sections": "node --test test/sections.test.js",
     "test:fuzzy": "node --test test/fuzzy.test.js",
