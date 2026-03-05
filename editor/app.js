@@ -251,7 +251,8 @@ function connectWs() {
   sessionToken = url.searchParams.get('token') || 'dev-session';
   document.getElementById('session-token').textContent = `[${sessionToken}]`;
 
-  const wsUrl = `ws://${window.location.host}?token=${encodeURIComponent(sessionToken)}`;
+  const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${wsProto}//${window.location.host}?token=${encodeURIComponent(sessionToken)}`;
   ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
