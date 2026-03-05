@@ -421,14 +421,10 @@ const requestHandlers = {
       return result.data;
     }
 
-    const result = fuzzyReplace(fullContent, params.search, params.replace, opts);
+    const allSections = getStableSections(fullContent);
+    const result = fuzzyReplace(fullContent, params.search, params.replace, { ...opts, sections: allSections });
     if (result.error) throw result.error;
     setDocContent(result.newContent);
-    if (result.data.line) {
-      const allSections = getStableSections(fullContent);
-      const sec = allSections.find(s => s.line_start <= result.data.line && s.line_end >= result.data.line);
-      result.data.section_id = sec?.id || null;
-    }
     return result.data;
   },
 

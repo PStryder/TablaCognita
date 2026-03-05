@@ -10,17 +10,17 @@ import { parseSections, findSection } from './sections.js';
  * @param {string} content - Full document content
  * @param {string} search - Text to find
  * @param {string} replace - Replacement text
- * @param {object} options - { fuzzy, markdown_aware, section, occurrence }
+ * @param {object} options - { fuzzy, markdown_aware, section, occurrence, sections }
  * @returns {{ newContent, data } | { error }} Result or error
  */
 export function fuzzyReplace(content, search, replace, options = {}) {
-  const { fuzzy = true, markdown_aware = true, section: sectionQuery, occurrence } = options;
+  const { fuzzy = true, markdown_aware = true, section: sectionQuery, occurrence, sections: providedSections } = options;
   let searchIn = content;
   let offset = 0;
 
   // Scope to section if specified
   if (sectionQuery) {
-    const allSections = parseSections(content);
+    const allSections = providedSections || parseSections(content);
     const section = findSection(allSections, sectionQuery);
     if (!section) {
       return { error: {
@@ -37,20 +37,20 @@ export function fuzzyReplace(content, search, replace, options = {}) {
   // Level 1: Exact match
   let matches = findAllOccurrences(searchIn, search);
   if (matches.length > 0) {
-    return applyReplace(content, matches, search, replace, offset, occurrence, false, false);
+    return applyReplace(content, matches, search, replace, offset, occurrence, false, false, providedSections);
   }
 
   // Level 2: Whitespace-normalized
   matches = findOccurrencesNormalized(searchIn, search);
   if (matches.length > 0) {
-    return applyReplace(content, matches, search, replace, offset, occurrence, false, false);
+    return applyReplace(content, matches, search, replace, offset, occurrence, false, false, providedSections);
   }
 
   // Level 3: Markdown-stripped (if enabled)
   if (markdown_aware) {
     matches = findOccurrencesMarkdownAware(searchIn, search);
     if (matches.length > 0) {
-      return applyReplace(content, matches, search, replace, offset, occurrence, false, true);
+      return applyReplace(content, matches, search, replace, offset, occurrence, false, true, providedSections);
     }
   }
 
@@ -59,7 +59,7 @@ export function fuzzyReplace(content, search, replace, options = {}) {
     const maxDist = Math.max(3, Math.floor(search.length * 0.15));
     matches = findFuzzyMatches(searchIn, search, maxDist);
     if (matches.length > 0) {
-      return applyReplace(content, matches, search, replace, offset, occurrence, true, false);
+      return applyReplace(content, matches, search, replace, offset, occurrence, true, false, providedSections);
     }
   }
 
@@ -347,7 +347,9 @@ export function findFuzzyMatches(text, search, maxDist) {
 }
 
 // --- Apply replacement ---
-function applyReplace(content, matches, search, replace, offset, occurrence, fuzzyApplied, markdownStripped) {
+function applyReplace(content, matches, search, replace, offset, occurrence, fuzzyApplied, markdownStripped, providedSections) {
+  const allSections = providedSections || parseSections(content);
+
   if (matches.length > 1 && occurrence === undefined) {
     return {
       error: {
@@ -356,7 +358,6 @@ function applyReplace(content, matches, search, replace, offset, occurrence, fuz
         matches: matches.map(m => {
           const absStart = offset + m.start;
           const line = content.slice(0, absStart).split('\n').length;
-          const allSections = parseSections(content);
           const sec = allSections.find(s => s.line_start <= line && s.line_end >= line);
           return {
             text: m.matched,
@@ -385,7 +386,6 @@ function applyReplace(content, matches, search, replace, offset, occurrence, fuz
   const absEnd = offset + match.end;
   const newContent = content.slice(0, absStart) + replace + content.slice(absEnd);
   const line = content.slice(0, absStart).split('\n').length;
-  const allSections = parseSections(content);
   const sec = allSections.find(s => s.line_start <= line && s.line_end >= line);
 
   return {

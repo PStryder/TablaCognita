@@ -10,6 +10,8 @@
  * @returns {Array} Section objects
  */
 export function parseSections(content, dirtyMap = new Map()) {
+  // Normalize line endings — CRLF breaks heading regex ($ doesn't match before \r)
+  content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = content.split('\n');
   const sections = [];
   let current = null;
