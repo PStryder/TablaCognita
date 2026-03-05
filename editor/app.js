@@ -159,6 +159,14 @@ function initEditor() {
   document.addEventListener('mousemove', resetIdleTimer);
   document.addEventListener('keydown', resetIdleTimer);
 
+  // Ctrl+S / Cmd+S to save
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      document.getElementById('save-file-btn').click();
+    }
+  });
+
   document.getElementById('preview-content').style.display = 'block';
   updatePreview();
 }
