@@ -19,9 +19,14 @@
     <span id="session-token"></span>
   </header>
   <main id="workspace">
-    <div id="editor-pane"></div>
+    <div id="editor-pane">
+      <button class="pane-copy-btn" id="copy-md-btn" title="Copy raw markdown">Copy</button>
+    </div>
     <div id="resize-handle"></div>
-    <div id="preview-pane"></div>
+    <div id="preview-pane">
+      <button class="pane-copy-btn" id="copy-preview-btn" title="Copy as rich text">Copy</button>
+      <div id="preview-content"></div>
+    </div>
   </main>
 
   <!-- Marked for preview rendering -->

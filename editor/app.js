@@ -159,7 +159,7 @@ function initEditor() {
   document.addEventListener('mousemove', resetIdleTimer);
   document.addEventListener('keydown', resetIdleTimer);
 
-  document.getElementById('preview-pane').style.display = 'block';
+  document.getElementById('preview-content').style.display = 'block';
   updatePreview();
 }
 
@@ -489,11 +489,8 @@ const requestHandlers = {
       }
     }
 
-    setDocContent(content);
-    dirtyMap.clear();
-    sectionRegistry.reset();
-    const initSections = getStableSections(content);
-    prevSections = initSections.map(s => ({ id: s.id, heading: s.heading }));
+    const displayName = params.source || null;
+    loadContent(content, displayName, null);
     return {
       total_lines: content.split('\n').length,
       sections: countTopLevelSections(content),
@@ -759,18 +756,86 @@ let previewTimer = null;
 function updatePreview() {
   if (previewTimer) clearTimeout(previewTimer);
   previewTimer = setTimeout(() => {
-    const previewPane = document.getElementById('preview-pane');
-    if (!previewPane || !view) return;
+    const previewContent = document.getElementById('preview-content');
+    if (!previewContent || !view) return;
     const content = getDocContent();
     if (typeof marked !== 'undefined') {
       const html = marked.parse(content);
-      previewPane.innerHTML = typeof DOMPurify !== 'undefined'
+      previewContent.innerHTML = typeof DOMPurify !== 'undefined'
         ? DOMPurify.sanitize(html)
         : html;
+      annotatePreviewLines(previewContent, content);
     } else {
-      previewPane.innerHTML = '<pre>' + content.replace(/</g, '&lt;') + '</pre>';
+      previewContent.innerHTML = '<pre>' + content.replace(/</g, '&lt;') + '</pre>';
     }
   }, 150);
+}
+
+function annotatePreviewLines(previewEl, content) {
+  if (typeof marked === 'undefined') return;
+  const tokens = marked.lexer(content);
+  const lineMap = [];
+  let line = 1;
+  for (const token of tokens) {
+    if (token.type !== 'space') {
+      lineMap.push(line);
+    }
+    line += (token.raw.match(/\n/g) || []).length;
+  }
+  const children = [...previewEl.children];
+  for (let i = 0; i < children.length && i < lineMap.length; i++) {
+    children[i].setAttribute('data-source-line', lineMap[i]);
+  }
+}
+
+// --- Click-to-Navigate ---
+function initPreviewNavigation() {
+  document.getElementById('preview-content').addEventListener('click', (e) => {
+    const target = e.target.closest('[data-source-line]');
+    if (!target || !view) return;
+    const line = parseInt(target.dataset.sourceLine, 10);
+    if (isNaN(line) || line < 1) return;
+    const docLine = Math.min(line, view.state.doc.lines);
+    const pos = view.state.doc.line(docLine).from;
+    view.dispatch({
+      selection: { anchor: pos },
+      scrollIntoView: true,
+    });
+    view.focus();
+  });
+}
+
+// --- Copy Buttons ---
+function initCopyButtons() {
+  document.getElementById('copy-md-btn').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(getDocContent());
+      flashCopyButton(document.getElementById('copy-md-btn'));
+    } catch (e) {
+      console.error('Copy failed:', e);
+    }
+  });
+
+  document.getElementById('copy-preview-btn').addEventListener('click', async () => {
+    const previewContent = document.getElementById('preview-content');
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([previewContent.innerHTML], { type: 'text/html' }),
+          'text/plain': new Blob([previewContent.textContent], { type: 'text/plain' }),
+        }),
+      ]);
+    } catch {
+      await navigator.clipboard.writeText(previewContent.textContent);
+    }
+    flashCopyButton(document.getElementById('copy-preview-btn'));
+  });
+}
+
+function flashCopyButton(btn) {
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = original; }, 1500);
 }
 
 // --- File Picker ---
@@ -782,7 +847,7 @@ function loadContent(content, filename, fileHandle) {
   const initSections = getStableSections(content);
   prevSections = initSections.map(s => ({ id: s.id, heading: s.heading }));
   const nameEl = document.getElementById('file-name');
-  nameEl.textContent = filename || '';
+  nameEl.textContent = filename || 'New';
   document.title = filename ? `${filename} — TablaCognita` : 'TablaCognita';
 }
 
@@ -913,4 +978,6 @@ function initResizeHandle() {
 initEditor();
 initFilePicker();
 initResizeHandle();
+initPreviewNavigation();
+initCopyButtons();
 connectWs();

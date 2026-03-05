@@ -49,7 +49,8 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 300px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .toolbar-spacer {
@@ -88,6 +89,7 @@ body {
   flex: 1;
   min-width: 100px;
   overflow: auto;
+  position: relative;
 }
 
 #resize-handle {
@@ -105,12 +107,51 @@ body {
 #preview-pane {
   flex: 1;
   min-width: 100px;
-  padding: 16px 24px;
-  overflow: auto;
-  border-left: none;
+  overflow: hidden;
+  position: relative;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.6;
+}
+
+#preview-content {
+  height: 100%;
+  overflow: auto;
+  padding: 16px 24px;
+}
+
+/* Copy buttons */
+.pane-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  padding: 2px 10px;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  background: rgba(26, 26, 46, 0.85);
+  color: #999;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+#editor-pane:hover .pane-copy-btn,
+#preview-pane:hover .pane-copy-btn {
+  opacity: 0.7;
+}
+
+.pane-copy-btn:hover {
+  opacity: 1 !important;
+  color: #e0e0e0;
+  background: #16213e;
+}
+
+/* Click-to-navigate hover */
+#preview-content [data-source-line]:hover {
+  background: rgba(233, 69, 96, 0.06);
+  cursor: pointer;
 }
 
 #preview-pane h1, #preview-pane h2, #preview-pane h3,
