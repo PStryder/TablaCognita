@@ -4,14 +4,14 @@
 
 ```
                         MCP (stdio | SSE)
-┌──────────────────┐ ◄──────────────────────► ┌──────────────────────┐
+┌──────────────────┐ ◄──────────────────────►  ┌──────────────────────┐
 │   AI Client      │                           │   Relay Server       │
 │  (Claude Desktop,│    Tool calls / results   │   (Node.js)          │
 │   Cursor, etc.)  │                           │                      │
 └──────────────────┘                           │  - MCP endpoint      │
                                                │  - WebSocket server  │
                                                │  - Session router    │
-┌──────────────────┐ ◄──────────────────────► │  - NO document state │
+┌──────────────────┐ ◄──────────────────────►  │  - NO document state │
 │   Browser Editor │    WebSocket (JSON)       └──────────────────────┘
 │                  │
 │  - CodeMirror 6  │    Source of truth for:
